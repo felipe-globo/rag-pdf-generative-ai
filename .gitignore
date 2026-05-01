@@ -1,0 +1,44 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Virtual environments ---
+venv/
+.venv/
+env/
+.env/
+.env.*            # keep .env.example tracked
+!.env.example
+
+# --- Packaging / build artifacts ---
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# --- Jupyter (if used) ---
+.ipynb_checkpoints/
+
+# --- IDEs ---
+.vscode/
+.idea/
+
+# --- OS files ---
+.DS_Store
+Thumbs.db
+
+# --- Logs / temp ---
+*.log
+*.tmp
+
+# --- Vector store / data (recommended) ---
+data/pdfs/
+data/chroma/
+chroma/
+
