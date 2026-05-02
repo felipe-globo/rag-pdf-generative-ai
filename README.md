@@ -9,37 +9,40 @@ Projeto acadêmico (Pós-graduação em Engenharia de Software com foco em IA) p
 
 ---
 
-## Arquitetura (alto nível)
+## Documentação técnica
 
-Fluxo principal do RAG:
+Documentação de escopo, planejamento e arquitetura está na pasta [`docs/`](docs/):
 
-1. **Ingestão**
-   - leitura de PDFs
-   - extração de texto e limpeza básica
-2. **Chunking**
-   - divisão do texto em trechos com sobreposição (para preservar contexto)
-3. **Embeddings**
-   - geração de vetores para cada chunk (modelo de embeddings)
-4. **Indexação / Vector Store**
-   - persistência dos vetores e metadados (ex.: `source`, página, posição)
-5. **Retrieval**
-   - busca por similaridade (top‑k) + filtros por metadados (quando aplicável)
-6. **Geração (LLM)**
-   - montagem do prompt com os trechos recuperados
-   - resposta final com base no contexto recuperado (idealmente com **citações**)
+| Documento | Conteúdo |
+|-----------|----------|
+| [`docs/escopo-mvp.md`](docs/escopo-mvp.md) | MVP: requisitos funcionais e não funcionais, fora de escopo, critérios de aceite |
+| [`docs/backlog.md`](docs/backlog.md) | Backlog em 3 releases (Core, Qualidade, Entrega final) |
+| [`docs/arquitetura.md`](docs/arquitetura.md) | Componentes, fluxo de dados (PDF → resposta), diagrama Mermaid, integração entre camadas |
 
-Componentes sugeridos (camadas):
+O **detalhamento** de arquitetura, decisões de desenho e limitações conscientes do sistema estão em `docs/arquitetura.md`. Este README resume o essencial e aponta para esses artefatos.
 
-- **UI/API**: Streamlit (interface de chat e upload/seleção de PDFs)
-- **RAG Core**: pipeline de ingestão, indexação, retrieval e geração
-- **Storage**: diretório de persistência do Chroma (ou outro vector store)
-- **Config**: variáveis de ambiente (`.env`) para chaves e parâmetros
+---
+
+## Arquitetura (resumo)
+
+Fluxo principal do RAG (alinha-se a [`docs/arquitetura.md`](docs/arquitetura.md)):
+
+1. **Ingestão** — PDFs → extração de texto e normalização básica  
+2. **Chunking** — divisão em trechos com sobreposição configurável  
+3. **Embeddings** — vetores por chunk (mesmo modelo na indexação e na consulta)  
+4. **Vector store** — persistência local (ex.: Chroma) com metadados (`source`, página, etc.)  
+5. **Retrieval** — similaridade (*top‑k*) sobre o índice  
+6. **LLM** — prompt com contexto recuperado + pergunta → resposta fundamentada no corpus  
+
+Camadas de referência: **UI** (Streamlit), **orquestração RAG** (LangChain), **storage** (Chroma em disco), **config** (`.env`).
+
+Para diagrama Mermaid, tabela de componentes e integração entre módulos, ver [`docs/arquitetura.md`](docs/arquitetura.md).
 
 ---
 
 ## Estrutura sugerida do repositório
 
-> A estrutura abaixo melhora organização, testabilidade e avaliação acadêmica. Você pode adotar integralmente antes de implementar as features.
+> A estrutura abaixo melhora organização, testabilidade e avaliação acadêmica. A pasta `docs/` já reflete a documentação técnica do MVP e da arquitetura; `src/` permanece o alvo da implementação.
 
 ```
 .
@@ -47,6 +50,10 @@ Componentes sugeridos (camadas):
 ├── requirements.txt
 ├── .gitignore
 ├── .env.example
+├── docs/
+│   ├── escopo-mvp.md
+│   ├── backlog.md
+│   └── arquitetura.md
 ├── data/
 │   ├── pdfs/                  # PDFs de entrada (não versionar conteúdo real)
 │   └── chroma/                # persistência do vector store (não versionar)
@@ -143,9 +150,9 @@ Se você criar um entrypoint (ex.: `python -m rag_pdf ...`), documente aqui os c
 
 - **Separação de camadas** (UI / core / storage / config)
 - **Persistência do índice** e reindexação controlada
-- **Rastreabilidade de fontes** (metadados por chunk: arquivo, página)
+- **Rastreabilidade de fontes** (metadados por chunk: arquivo, página), conforme reforçado em [`docs/escopo-mvp.md`](docs/escopo-mvp.md)
 - **Configuração via ambiente** (sem chaves hard-coded)
-- **Testes de fumaça** (indexação e retrieval mínimos)
+- **Testes de fumaça** (indexação e retrieval mínimos), previstos no roadmap em [`docs/backlog.md`](docs/backlog.md)
 
 ---
 
