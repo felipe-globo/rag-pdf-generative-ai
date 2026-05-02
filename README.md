@@ -1,5 +1,7 @@
 ## RAG com documentos PDF usando IA Generativa
 
+**Versão estável:** [`v1.0.0`](https://github.com/felipe-globo/rag-pdf-generative-ai/releases) (Semantic Versioning) — **MVP backend + CLI concluído**.
+
 Projeto acadêmico (Pós-graduação em Engenharia de Software com foco em IA) para construir um sistema de **Retrieval-Augmented Generation (RAG)** que:
 
 - lê e processa documentos **PDF**
@@ -12,6 +14,21 @@ Projeto acadêmico (Pós-graduação em Engenharia de Software com foco em IA) p
 O **MVP do backend RAG está concluído e validado localmente** via **CLI** (`app.py`): ingestão → indexação (Chroma persistido) → *retrieval* semântico → resposta com LLM e citações derivadas dos metadados.
 
 **Fora do escopo desta entrega:** interface gráfica (ex.: Streamlit, *web app*, *chat UI*). Essa evolução está registrada como trabalho futuro em [`docs/backlog.md`](docs/backlog.md) e na seção [Próximos passos](#próximos-passos--trabalho-futuro) abaixo.
+
+---
+
+## Release v1.0.0 — MVP estável
+
+**Objetivo desta versão:** congelar o **primeiro baseline funcional**: RAG ponta‑a‑ponta por linha de comando, testável sem UI.
+
+| Incluído | Descrição |
+|----------|-----------|
+| Pipeline completo | Ingestão PDF → chunking → embeddings → Chroma persistido → retrieval semântico → chain LLM com citações |
+| CLI | `app.py` (`--index`, `-q`, parâmetros e `.env`; ver [Como rodar](#como-rodar-cli--mvp)) |
+| Qualidade | Suite `pytest` com doubles (embeddings / LLM) e um fluxo de integração sintético |
+| Documentação | `docs/` (`escopo-mvp.md`, `arquitetura.md`, `backlog.md`) + este README |
+
+**Critérios de uso em produção acadêmica:** Python 3.9+, dependências em `requirements.txt`, `OPENAI_API_KEY` no `.env`; PDFs locais sob `PDF_DIR`; índice Chroma sob `CHROMA_PERSIST_DIR`.
 
 ---
 
@@ -142,7 +159,7 @@ cp .env.example .env
 
 ---
 
-## Como rodar (CLI — MVP)
+## Como rodar (CLI — MVP) — entrega v1.0.0
 
 Coloque seus PDFs em `data/pdfs/` **ou** aponte `--pdf-dir` para a pasta onde estão os arquivos.
 

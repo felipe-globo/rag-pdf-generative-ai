@@ -4,6 +4,8 @@ Organização em **três releases**, do núcleo funcional até entrega e refinam
 
 ## Estado atual (pós‑MVP backend)
 
+**Versão Git:** tag **`v1.0.0`** — release estável do MVP (Semantic Versioning). *Release notes* resumidas no [`README.md`](../README.md) (secção *Release v1.0.0*).
+
 **MVP backend + CLI:** concluído — pipeline *PDF → chunks → embeddings → Chroma persistido → retrieval → resposta LLM com citações*, exposto via `app.py` e scripts auxiliares em `scripts/`.
 
 **Interface gráfica (UI):** deliberadamente **não implementada nesta versão**. Itens relacionados foram movidos para evoluções futuras (principalmente Releases 2–3).
@@ -59,6 +61,6 @@ Organização em **três releases**, do núcleo funcional até entrega e refinam
 | R3.3 | Script ou Makefile com alvos `install`, `run`, `test` (se aplicável) | Reduz fricção para avaliador |
 | R3.4 | (*Opcional*) deploy estático da UI ou container Docker para demo | Streamlit Community Cloud ou Docker local |
 | R3.5 | (*Opcional*) `LICENSE` e política de dados se houver uso de PDFs reais | Alinhamento institucional |
-| R3.6 | Tag de versão (ex.: `v1.0.0`) e release notes curtas no GitHub | Rastreabilidade da entrega |
+| R3.6 | Tag de versão `v1.0.0` e *release notes* no README / GitHub Releases | ✅ Baseline entregue em `v1.0.0`; publicar *Release* no GitHub ao fazer push da tag |
 
 **Critério de conclusão da Release 3:** projeto apresentável, documentado e reproduzível por terceiros com esforço baixo.

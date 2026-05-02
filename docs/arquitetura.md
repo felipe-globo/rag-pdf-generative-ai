@@ -4,6 +4,8 @@
 
 Descrever, em alto nível, os **componentes** do sistema, o **fluxo de dados** desde o PDF até a resposta do modelo de linguagem, e como essas partes se integram. O desenho prioriza **simplicidade** e adequação a um contexto acadêmico com execução local.
 
+**Versão:** o desenho abaixo reflete o **MVP estável `v1.0.0`** (entrada via CLI `app.py`, sem UI gráfica nesta baseline).
+
 ## 2. Visão geral dos componentes
 
 | Camada | Responsabilidade | Tecnologias de referência |
