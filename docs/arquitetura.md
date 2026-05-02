@@ -8,7 +8,7 @@ Descrever, em alto nível, os **componentes** do sistema, o **fluxo de dados** d
 
 | Camada | Responsabilidade | Tecnologias de referência |
 |--------|------------------|---------------------------|
-| **Interface (UI)** | Upload/seleção de PDFs, entrada da pergunta, exibição da resposta (e, em evoluções, trechos recuperados) | Streamlit |
+| **Interface (uso)** | No MVP atual: **CLI** (`app.py`) para indexação e perguntas; em evolução futura: UI (ex.: Streamlit) | CLI (Python) |
 | **Orquestração RAG** | Encadeamento de carregamento, divisão em chunks, embeddings, armazenamento vetorial, recuperação e geração | LangChain |
 | **Carregamento de documentos** | Extração de texto dos PDFs e conversão em documentos estruturados | PyPDF, loaders LangChain |
 | **Chunking** | Segmentação do texto em unidades indexáveis com sobreposição | Text splitters LangChain |
@@ -19,7 +19,7 @@ Descrever, em alto nível, os **componentes** do sistema, o **fluxo de dados** d
 
 ## 3. Fluxo de dados (upload → resposta)
 
-1. **Entrada:** o usuário fornece um ou mais PDFs pela UI (ou aponta para diretório configurado).
+1. **Entrada:** o usuário disponibiliza PDFs em disco (ex.: `data/pdfs/`) ou aponta um diretório via CLI/config; em uma UI futura, haverá upload pelo navegador.
 2. **Load:** o módulo de carregamento lê os bytes do PDF e extrai texto; cada fonte vira um ou mais `Document` com metadados (ex.: `source`, página).
 3. **Split:** o texto é dividido em **chunks** com tamanho e *overlap* definidos; cada chunk mantém metadados herdados.
 4. **Embed:** cada chunk é enviado ao serviço de **embeddings**; o vetor resultante é a representação semântica do trecho.
@@ -34,8 +34,8 @@ Em versões com melhoria de qualidade, a UI pode exibir os trechos recuperados p
 
 ```mermaid
 flowchart TB
-  subgraph UI["Interface"]
-    ST["Streamlit"]
+  subgraph UI["Interface (MVP)"]
+    ST["CLI (app.py)"]
   end
 
   subgraph Ingestao["Ingestão"]
@@ -91,9 +91,9 @@ Chroma atua como **repositório de vetores + metadados**, permitindo consultas p
 
 Recebe prompt estruturado: instruções do sistema (uso exclusivo do contexto), blocos de texto recuperados e pergunta. Temperatura e *top-k* afetam criatividade versus aderência ao texto fonte.
 
-### 5.6 Interface do usuário
+### 5.6 Interface / ponto de entrada (MVP)
 
-Orquestra chamadas ao pipeline: disparar reindexação quando novos PDFs são adicionados, enviar pergunta ao retriever + chain e exibir resultado. Não deve conter lógica de negócio pesada além de validação de entrada e feedback visual.
+No MVP atual, o **`app.py` (CLI)** orquestra o fluxo: disparar indexação opcional quando solicitado (`--index`), enviar pergunta ao *retriever* + *chain* e imprimir resultado (incluindo lista de citações). Evoluções futuras (Streamlit/web) devem apenas **consumir** os mesmos serviços, sem duplicar regra de negócio.
 
 ## 6. Limitações conscientes do desenho
 
