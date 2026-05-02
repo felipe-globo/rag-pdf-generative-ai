@@ -8,6 +8,7 @@ venv/
 .venv/
 env/
 .env/
+.env
 .env.*            # keep .env.example tracked
 !.env.example
 
@@ -39,6 +40,7 @@ Thumbs.db
 
 # --- Vector store / data (recommended) ---
 data/pdfs/
+data/**/*.pdf
 data/chroma/
 chroma/
 
