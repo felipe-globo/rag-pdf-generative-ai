@@ -7,6 +7,12 @@ Projeto acadêmico (Pós-graduação em Engenharia de Software com foco em IA) p
 - armazena e consulta em uma **base vetorial**
 - responde perguntas **grounded** no conteúdo dos documentos (com rastreabilidade de fontes)
 
+### Status do MVP (escopo fechado)
+
+O **MVP do backend RAG está concluído e validado localmente** via **CLI** (`app.py`): ingestão → indexação (Chroma persistido) → *retrieval* semântico → resposta com LLM e citações derivadas dos metadados.
+
+**Fora do escopo desta entrega:** interface gráfica (ex.: Streamlit, *web app*, *chat UI*). Essa evolução está registrada como trabalho futuro em [`docs/backlog.md`](docs/backlog.md) e na seção [Próximos passos](#próximos-passos--trabalho-futuro) abaixo.
+
 ---
 
 ## Documentação técnica
@@ -34,7 +40,7 @@ Fluxo principal do RAG (alinha-se a [`docs/arquitetura.md`](docs/arquitetura.md)
 5. **Retrieval** — similaridade (*top‑k*) sobre o índice  
 6. **LLM** — prompt com contexto recuperado + pergunta → resposta fundamentada no corpus  
 
-Camadas de referência: **UI** (Streamlit), **orquestração RAG** (LangChain), **storage** (Chroma em disco), **config** (`.env`).
+Camadas de referência (MVP): **CLI** (`app.py`), **orquestração RAG** (módulos em `rag_pdf/` com LangChain/OpenAI/Chroma conforme código), **storage** (Chroma em disco), **config** (`.env`).
 
 Para diagrama Mermaid, tabela de componentes e integração entre módulos, ver [`docs/arquitetura.md`](docs/arquitetura.md).
 
@@ -42,11 +48,13 @@ Para diagrama Mermaid, tabela de componentes e integração entre módulos, ver 
 
 ## Estrutura sugerida do repositório
 
-> A estrutura abaixo melhora organização, testabilidade e avaliação acadêmica. A pasta `docs/` já reflete a documentação técnica do MVP e da arquitetura; `src/` permanece o alvo da implementação.
+> Estrutura alinhada ao MVP **backend + CLI**. PDFs e Chroma local não são versionados (ver `.gitignore`).
 
 ```
 .
 ├── README.md
+├── app.py                      # CLI end-to-end (indexar + perguntar)
+├── pyproject.toml               # configuração pytest (pythonpath → src/)
 ├── requirements.txt
 ├── .gitignore
 ├── .env.example
@@ -54,32 +62,51 @@ Para diagrama Mermaid, tabela de componentes e integração entre módulos, ver 
 │   ├── escopo-mvp.md
 │   ├── backlog.md
 │   └── arquitetura.md
+├── scripts/                    # exemplos de uso por etapa (opcional)
 ├── data/
-│   ├── pdfs/                  # PDFs de entrada (não versionar conteúdo real)
-│   └── chroma/                # persistência do vector store (não versionar)
+│   ├── pdfs/                   # PDFs de entrada (local; não versionar)
+│   └── chroma/                 # persistência do vector store (local; não versionar)
 ├── src/
 │   └── rag_pdf/
-│       ├── __init__.py
-│       ├── config.py           # leitura de env + defaults
-│       ├── ingestion/
-│       │   ├── __init__.py
-│       │   ├── pdf_loader.py   # leitura/extração de texto do PDF
-│       │   └── chunking.py     # splitters e normalização
-│       ├── vectorstore/
-│       │   ├── __init__.py
-│       │   └── chroma.py       # criação/persistência/consulta
-│       ├── rag/
-│       │   ├── __init__.py
-│       │   ├── retriever.py    # k, filtros, estratégia
-│       │   └── chain.py        # orquestração LLM + contexto
-│       └── ui/
-│           ├── __init__.py
-│           └── app_streamlit.py
-└── tests/
-    └── test_smoke.py
+│       ├── config.py
+│       ├── ingestion/          # PDF → texto → chunks
+│       ├── embeddings/         # embeddings (OpenAI)
+│       ├── vectorstore/       # indexação Chroma persistida
+│       ├── rag/               # retrieval + chain LLM
+│       ├── llm/               # provedor de chat
+│       └── utils/             # ex.: bootstrap de .env
+├── tests/                     # pytest — unitários + integração (doubles, sem API real)
+│   ├── conftest.py
+│   ├── test_loader.py
+│   ├── test_retriever.py
+│   ├── test_chain.py
+│   └── test_integration.py
 ```
 
 ---
+
+## Testes (qualidade)
+
+Os testes rodam com **`pytest`**, **sem chamar OpenAI/Chroma em produção** nos casos principais: *embeddings* e *LLM* usam **implementações determinísticas** definidas em `tests/conftest.py` (vetores hash-based e LLM sintético).
+
+```bash
+venv/bin/pip install -r requirements.txt
+venv/bin/python -m pytest -q
+```
+
+Arquivos relevantes:
+
+| Arquivo | Cobertura focada |
+|---------|------------------|
+| `tests/test_loader.py` | limpeza de texto, *chunking* com *fallback* offline, `PdfReader` isolado com *mock* |
+| `tests/test_retriever.py` | IDs determinísticos, validação de parâmetros, indexação + consulta no Chroma em diretório temporário |
+| `tests/test_chain.py` | *prompt* + chamada ao *LLM double* + citações/meta |
+| `tests/test_integration.py` | fluxo RAG sintético (`LoadedDocument` → chunks → índice → resposta), sem PDF em disco |
+
+O `pythonpath` para importar `rag_pdf/` é definido em `pyproject.toml` (`tool.pytest.ini_options`).
+
+---
+
 
 ## Requisitos
 
@@ -115,44 +142,57 @@ cp .env.example .env
 
 ---
 
-## Como rodar
+## Como rodar (CLI — MVP)
 
-### Interface (Streamlit)
+Coloque seus PDFs em `data/pdfs/` **ou** aponte `--pdf-dir` para a pasta onde estão os arquivos.
 
-Quando `src/rag_pdf/ui/app_streamlit.py` existir:
+**Indexar e perguntar** (primeira execução ou após mudar corpus):
 
 ```bash
-streamlit run src/rag_pdf/ui/app_streamlit.py
+venv/bin/python app.py --index -q "Sua pergunta aqui"
 ```
 
-### Execução por linha de comando (opcional)
+**Somente perguntar** (índice já persistido em `CHROMA_PERSIST_DIR`):
 
-Se você criar um entrypoint (ex.: `python -m rag_pdf ...`), documente aqui os comandos principais:
+```bash
+venv/bin/python app.py -q "Sua pergunta aqui"
+```
 
-- indexar PDFs
-- fazer perguntas
-- limpar/recriar índice
+Parâmetros úteis: `--k`, `--pdf-dir`, `--persist-dir`, `--collection`, `--embed-model`, `--llm-model` (ver `app.py --help`). Variáveis de ambiente equivalentes estão em `.env.example`.
+
+Scripts auxiliares em `scripts/` (ingestão, indexação, retrieval, resposta isolados) permanecem disponíveis para depuração.
+
+---
+
+## Próximos passos / trabalho futuro
+
+Não faz parte do MVP atual; previsto como evolução de produto e detalhado no [`docs/backlog.md`](docs/backlog.md):
+
+- **Interface gráfica** (Streamlit ou *web*) para upload, perguntas e visualização de trechos recuperados
+- **Makefile / alvos** `install`, `run`, `test` para onboarding de avaliadores
+- **Ampliação de cobertura de testes** (filtros metadata, cenários PDF reais opcionais, *CI* em GitHub Actions)
+- Opcional: *deploy* de demo (Streamlit Cloud, Docker)
 
 ---
 
 ## Tecnologias utilizadas
 
-- **LangChain**: orquestração do pipeline RAG (loaders, splitters, retrievers, chains)
+- **LangChain**: integração OpenAI (embeddings e chat usados pelo código)
 - **ChromaDB**: vector store local com persistência
 - **PyPDF**: extração de texto de PDFs
-- **tiktoken**: utilitários de tokenização/contagem (controle de contexto)
-- **Streamlit**: interface web simples para demonstração
+- **tiktoken**: utilitários de tokenização/contagem (controle de contexto / chunking)
 - **python-dotenv**: carregamento de `.env` (segurança e portabilidade)
+- **pytest**: testes automatizados (vide seção Testes)
 
 ---
 
 ## Boas práticas adotadas (recomendadas para avaliação)
 
-- **Separação de camadas** (UI / core / storage / config)
+- **Separação de camadas** (CLI / núcleo RAG / embeddings / LLM / storage / config)
 - **Persistência do índice** e reindexação controlada
 - **Rastreabilidade de fontes** (metadados por chunk: arquivo, página), conforme reforçado em [`docs/escopo-mvp.md`](docs/escopo-mvp.md)
 - **Configuração via ambiente** (sem chaves hard-coded)
-- **Testes de fumaça** (indexação e retrieval mínimos), previstos no roadmap em [`docs/backlog.md`](docs/backlog.md)
+- **Suite de testes automatizados** com *pytest* (`tests/` + doubles), alinhado ao backlog (Release 2) em [`docs/backlog.md`](docs/backlog.md)
 
 ---
 
