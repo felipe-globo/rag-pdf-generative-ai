@@ -4,6 +4,8 @@
 
 Este documento delimita o **Produto Mínimo Viável (MVP)** do sistema de *Retrieval-Augmented Generation* (RAG) sobre documentos PDF, servindo como referência para desenvolvimento, avaliação acadêmica e controle de escopo.
 
+**Fechamento do MVP (backend):** o escopo mínimo foi atendido com **pipeline RAG completo** e **CLI** para indexação e perguntas. Interface gráfica (Streamlit/web) **não** integra este fechamento — ver [`backlog.md`](backlog.md), itens futuros de UI.
+
 ## 2. Visão do MVP
 
 O MVP consiste em um sistema que:
@@ -21,7 +23,7 @@ O MVP consiste em um sistema que:
 | RF-03 | Gerar **embeddings** para cada chunk e persistir no **vector store** | Alta |
 | RF-04 | Permitir **consulta** ao índice (similaridade) retornando os trechos mais relevantes (*top-k*) | Alta |
 | RF-05 | Enviar ao **LLM** o contexto recuperado + pergunta do usuário e gerar **resposta textual** | Alta |
-| RF-06 | Expor **interface** (ex.: Streamlit) para upload/seleção de PDFs, pergunta e exibição da resposta | Alta |
+| RF-06 | Expor **interface de uso** para indexar PDFs e fazer perguntas (MVP: **CLI** `app.py`; UI gráfica opcional em evolução futura) | Alta |
 | RF-07 | Associar metadados mínimos aos chunks (ex.: nome do arquivo, página ou índice do chunk) para rastreabilidade | Média |
 | RF-08 | Documentar variáveis de ambiente (ex.: chave de API) via `.env.example` | Média |
 
