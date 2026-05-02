@@ -2,24 +2,30 @@
 
 Organização em **três releases**, do núcleo funcional até entrega e refinamentos. Itens são objetivos e podem virar *issues* no GitHub.
 
+## Estado atual (pós‑MVP backend)
+
+**MVP backend + CLI:** concluído — pipeline *PDF → chunks → embeddings → Chroma persistido → retrieval → resposta LLM com citações*, exposto via `app.py` e scripts auxiliares em `scripts/`.
+
+**Interface gráfica (UI):** deliberadamente **não implementada nesta versão**. Itens relacionados foram movidos para evoluções futuras (principalmente Releases 2–3).
+
 ---
 
 ## Release 1 — Core (MVP funcional do RAG)
 
-**Objetivo:** pipeline completo *upload/indexação → pergunta → resposta*, executável localmente.
+**Objetivo:** pipeline completo *ingestão/indexação → pergunta → resposta*, executável localmente (via CLI).
 
 | # | Item | Notas |
 |---|------|--------|
-| R1.1 | Estruturar pacote Python (`src/`, módulos ingestão, vector store, RAG, UI) | Facilita testes e manutenção |
-| R1.2 | Implementar leitura de PDF (PyPDF / loader LangChain) e normalização básica de texto | Tratar quebras de linha e espaços |
-| R1.3 | Implementar *chunking* (tamanho, overlap) com parâmetros via config/env | Valores default documentados |
-| R1.4 | Integrar modelo de embeddings e vector store (Chroma) com persistência em disco | Caminho configurable (`CHROMA_PERSIST_DIR`) |
-| R1.5 | Implementar fluxo de *retrieval* (*top-k*) e montagem de prompt para o LLM | LangChain chain ou equivalente |
-| R1.6 | Implementar UI mínima (Streamlit): área de PDFs, indexar, chat/pergunta, resposta | Estados de carregamento e erro simples |
-| R1.7 | Configuração via `.env` + `python-dotenv`; validar ausência de segredos no Git | Alinhar com `.env.example` |
-| R1.8 | Atualizar README com instalação, execução e variáveis obrigatórias | Incluir comando `streamlit run` |
+| R1.1 | Estruturar pacote Python (`src/rag_pdf/`: ingestão, embeddings, vector store, RAG, LLM, config) | ✅ MVP |
+| R1.2 | Implementar leitura de PDF (PyPDF) e normalização básica de texto | ✅ MVP |
+| R1.3 | Implementar *chunking* (tamanho, overlap) com parâmetros via config/env | ✅ MVP |
+| R1.4 | Integrar modelo de embeddings e vector store (Chroma) com persistência em disco | ✅ MVP |
+| R1.5 | Implementar fluxo de *retrieval* (*top-k*) e *chain* para o LLM (prompt grounded + citações) | ✅ MVP |
+| R1.6 | ~~Implementar UI mínima (Streamlit)~~ | **Futuro** — ver Release 2 (R2.7) / Release 3 |
+| R1.7 | Configuração via `.env` + `python-dotenv`; validar ausência de segredos no Git | ✅ MVP |
+| R1.8 | Documentar README: instalação, execução CLI (`app.py`), variáveis obrigatórias | ✅ MVP |
 
-**Critério de conclusão da Release 1:** um usuário consegue, em máquina local, indexar PDF(s) e obter respostas coerentes com o corpus carregado.
+**Critério de conclusão da Release 1:** um usuário consegue, em máquina local, indexar PDF(s) e obter respostas coerentes com o corpus carregado — **cumprido com CLI** (`app.py`).
 
 ---
 
@@ -31,10 +37,12 @@ Organização em **três releases**, do núcleo funcional até entrega e refinam
 |---|------|--------|
 | R2.1 | Exibir **trechos recuperados** e metadados (arquivo, página/chunk) junto à resposta | Transparência e avaliação acadêmica |
 | R2.2 | Ajustar prompt do sistema: instruções para citar apenas o contexto e admitir “não sei” | Reduz alucinação fora do corpus |
-| R2.3 | Parâmetros de RAG expostos na UI ou arquivo de config (*top-k*, chunk size, temperatura) | Sem obrigar rebuild |
+| R2.3 | Parâmetros de RAG expostos na **CLI** ou arquivo de config (*top‑k*, chunk size, temperatura) | UI web como evolução em R2.7 |
 | R2.4 | Tratamento de erros explícito (PDF vazio, falha de API, índice vazio) | Mensagens claras ao usuário |
-| R2.5 | Testes automatizados mínimos (smoke: mock de embeddings/LLM ou fixture pequena) | pytest opcional |
+| R2.5 | Testes automatizados com *pytest* (doubles embeddings/LLM; integração sintética) | ✅ baseline em `tests/` — expandir cenários conforme roadmap |
 | R2.6 | (*Opcional*) estratégia para PDFs com pouco texto — aviso ao usuário ou tentativa de OCR simples | Escopo incremental |
+| R2.7 | **Nova — UI (Streamlit ou web)** | Upload, disparo de indexação, chat, visualização opcional dos trechos recuperados |
+
 
 **Critério de conclusão da Release 2:** fluxo estável, respostas mais auditáveis e experiência menos frágil para demonstração e correção.
 
@@ -42,7 +50,7 @@ Organização em **três releases**, do núcleo funcional até entrega e refinam
 
 ## Release 3 — Entrega final (refinamentos, documentação e deploy)
 
-**Objetivo:** fechar o ciclo acadêmico com documentação consolidada e opção de demonstração acessível.
+**Objetivo:** fechar o ciclo acadêmico com documentação consolidada e opção de demonstração acessível — **opcional quando houver UI ou demo pública**.
 
 | # | Item | Notas |
 |---|------|--------|
